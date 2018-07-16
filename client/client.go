@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"net"
 	"sync"
 	"time"
@@ -41,6 +42,7 @@ func writeString(writer *bufio.Writer, conn net.Conn) {
 
 func write3copy(done chan<- struct{}) {
 	for i := 0; i < WriteNum; i++ {
+		start := time.Now()
 		var wg sync.WaitGroup
 		for _, server := range Server {
 			wg.Add(1)
@@ -48,15 +50,17 @@ func write3copy(done chan<- struct{}) {
 			writer := bufio.NewWriter(conn)
 			go func(writer *bufio.Writer, conn net.Conn) {
 				defer func() {
-				    wg.Done()
-				    conn.Close()
-			   	}()
+					wg.Done()
+					conn.Close()
+				}()
 				writer.WriteString(text)
 				writer.Flush()
 				buffer := make([]byte, 512)
 				conn.Read(buffer)
 			}(writer, conn)
 		}
+
+		fmt.Println(time.Since(start).Seconds())
 		wg.Wait()
 	}
 	done <- struct{}{}
