@@ -26,12 +26,13 @@ func init() {
 		factory := func() (net.Conn, error) {
 			return net.Dial("tcp", server)
 		}
-		pi, _ := pool.NewChannelPool(2, 10, factory)
+		pi, _ := pool.NewChannelPool(3, 10, factory)
 		p[server] = pi
 	}
 }
 
 func writeString(writer *bufio.Writer, conn net.Conn) {
+	defer conn.Close()
 	writer.WriteString(text)
 	writer.Flush()
 	buffer := make([]byte, 512)
@@ -46,7 +47,10 @@ func write3copy(done chan<- struct{}) {
 			conn, _ := p[server].Get()
 			writer := bufio.NewWriter(conn)
 			go func(writer *bufio.Writer, conn net.Conn) {
-				defer wg.Done()
+				defer func() {
+				    wg.Done()
+				    conn.Close()
+			   	}()
 				writer.WriteString(text)
 				writer.Flush()
 				buffer := make([]byte, 512)
