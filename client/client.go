@@ -55,12 +55,12 @@ func write3copy(done chan<- struct{}) {
 				}()
 				writer.WriteString(text)
 				writer.Flush()
-				buffer := make([]byte, 512)
+				var buffer []byte
 				conn.Read(buffer)
 			}(writer, conn)
 		}
 
-		fmt.Println(time.Since(start).Seconds())
+		fmt.Println(time.Since(start).String())
 		wg.Wait()
 	}
 	done <- struct{}{}
