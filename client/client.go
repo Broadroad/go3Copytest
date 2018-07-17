@@ -73,7 +73,6 @@ func main() {
 		}
 
 	}()
-	time.Sleep(time.Second * 20)
 	done := make(chan struct{})
 	for i := 0; i < WriteThread; i++ {
 		go write3copy(done)
