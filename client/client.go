@@ -48,7 +48,7 @@ func write3copy(done chan<- struct{}) {
 			wg.Add(1)
 			conn, _ := p[server].Get()
 			writer := bufio.NewWriter(conn)
-			go func(writer *bufio.Writer, conn net.Conn) {
+			go func(writer *bufio.Writer, conn net.Conn, wg *sync.WaitGroup) {
 				defer func() {
 					wg.Done()
 					conn.Close()
@@ -57,7 +57,7 @@ func write3copy(done chan<- struct{}) {
 				writer.Flush()
 				var buffer []byte
 				conn.Read(buffer)
-			}(writer, conn)
+			}(writer, conn, &wg)
 		}
 
 		fmt.Println(time.Since(start).String())
