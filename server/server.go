@@ -34,14 +34,15 @@ func main() {
 }
 
 func handleConnection(conn net.Conn) {
-	buffer := make([]byte, 512)
-	conn.Read(buffer)
+	for {
+		buffer := make([]byte, 512)
+		conn.Read(buffer)
 
-	var resp []byte = []byte("You are welcome. I'm server.")
-	n, err := conn.Write(resp)
-	if err != nil {
-		fmt.Println("Write error:", err)
+		var resp []byte = []byte("You are welcome. I'm server.")
+		_, err := conn.Write(resp)
+		if err != nil {
+			fmt.Println("Write error:", err)
+		}
+		fmt.Println("connetion end")
 	}
-	fmt.Println("send:", n)
-	fmt.Println("connetion end")
 }
