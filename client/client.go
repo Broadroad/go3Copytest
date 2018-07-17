@@ -12,10 +12,10 @@ import (
 
 var (
 	WriteNum    = 100000
-	WriteThread = 1
+	WriteThread = 3
 	ConnNum     = 10
-	//Server      [3]string = [3]string{"10.249.249.171:9069", "10.249.249.172:9069", "10.249.249.173:9069"}[:3]
-	Server [1]string = [1]string{"127.0.0.1:8080"}
+	Server      [3]string = [3]string{"10.249.249.171:8080", "10.249.249.172:8080", "10.249.249.173:8080"}
+	//Server [1]string = [1]string{"127.0.0.1:8080"}
 
 	p    map[string]pool.Pool
 	text = "sadfasdfsafasdfasdfasdffffffffffffffffffffffffffffffffffffffafasdffffffffffffffffffffffffffffffffffffffffffff\n"
@@ -61,11 +61,14 @@ func write3copy(done chan<- struct{}) {
 					fmt.Println(err, n)
 				}
 					
-				fmt.Println(string(buffer))
 			}(writer, conn, wg)
 		}
 
-		fmt.Println(time.Since(start).String())
+		if time.Since(start).Seconds() * 1000 > 2 {
+			fmt.Println("kang" , time.Since(start).Seconds() * 1000)
+		}else {
+			fmt.Println(time.Since(start).Seconds() * 1000)
+		}
 		wg.Wait()
 	}
 	time.Sleep(time.Second)
