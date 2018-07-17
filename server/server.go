@@ -1,9 +1,11 @@
 package main
 
 import (
+	"time"
 	"fmt"
 	"log"
 	"net"
+	"bufio"
 )
 
 func main() {
@@ -33,13 +35,42 @@ func main() {
 	}
 }
 
-func handleConnection(conn net.Conn) {
-	for {
-		buffer := make([]byte, 512)
-		conn.Read(buffer)
 
+func HeartBeating(conn net.Conn, readerChannel chan byte,timeout int) {
+		select {
+		case <-readerChannel:
+			conn.SetDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
+			break
+		case <-time.After(time.Second*5):
+			conn.Close()
+		}
+ 
+	}
+
+func handleMessage(n []byte,mess chan byte){
+	for _ , v := range n{
+		mess <- v
+	}
+	close(mess)
+}
+
+func handleConnection(conn net.Conn) {
+	defer conn.Close()
+	reader := bufio.NewReader(conn)
+	conn.SetReadDeadline(time.Now().Add(1000 * time.Second))
+	for {
+		message1, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println(err, message1)
+			break
+		}
+
+		//message := make(chan byte)
+//		go HeartBeating(conn, message, 10)
+//		go handleMessage(message, message)
+		fmt.Println(message1, "kang")
 		var resp []byte = []byte("You are welcome. I'm server.")
-		_, err := conn.Write(resp)
+		_, err = conn.Write(resp)
 		if err != nil {
 			fmt.Println("Write error:", err)
 		}

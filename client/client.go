@@ -11,14 +11,14 @@ import (
 )
 
 var (
-	WriteNum    = 1000
-	WriteThread = 10
+	WriteNum    = 100000
+	WriteThread = 1
 	ConnNum     = 10
 	//Server      [3]string = [3]string{"10.249.249.171:9069", "10.249.249.172:9069", "10.249.249.173:9069"}[:3]
 	Server [1]string = [1]string{"127.0.0.1:8080"}
 
 	p    map[string]pool.Pool
-	text = "sadfasdfsafasdfasdfasdffffffffffffffffffffffffffffffffffffffafasdffffffffffffffffffffffffffffffffffffffffffff"
+	text = "sadfasdfsafasdfasdfasdffffffffffffffffffffffffffffffffffffffafasdffffffffffffffffffffffffffffffffffffffffffff\n"
 )
 
 func init() {
@@ -43,7 +43,7 @@ func writeString(writer *bufio.Writer, conn net.Conn) {
 func write3copy(done chan<- struct{}) {
 	for i := 0; i < WriteNum; i++ {
 		start := time.Now()
-		var wg sync.WaitGroup
+		wg := &sync.WaitGroup{}
 		for _, server := range Server {
 			wg.Add(1)
 			conn, _ := p[server].Get()
@@ -56,14 +56,19 @@ func write3copy(done chan<- struct{}) {
 				writer.WriteString(text)
 				writer.Flush()
 				buffer := make([]byte, 100)
-				conn.Read(buffer)
+				n, err := conn.Read(buffer)
+				if err != nil{
+					fmt.Println(err, n)
+				}
+					
 				fmt.Println(string(buffer))
-			}(writer, conn, &wg)
+			}(writer, conn, wg)
 		}
 
 		fmt.Println(time.Since(start).String())
 		wg.Wait()
 	}
+	time.Sleep(time.Second)
 	done <- struct{}{}
 }
 
