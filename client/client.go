@@ -55,8 +55,9 @@ func write3copy(done chan<- struct{}) {
 				}()
 				writer.WriteString(text)
 				writer.Flush()
-				var buffer []byte
+				buffer := make([]byte, 100)
 				conn.Read(buffer)
+				fmt.Println(string(buffer))
 			}(writer, conn, &wg)
 		}
 
